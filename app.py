@@ -18,10 +18,11 @@ __author__ = 'aleung@juniper.net'
 #
 #
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from jnpr.junos import Device
 import sessionsDAO
 import pymongo
+import json
 
 app = Flask(__name__)
 
@@ -60,6 +61,34 @@ def login():
         else:
             error = 'Wrong Credentials. Please try again.'
     return render_template('login.html', error=error)
+
+@app.route('/session/destination')
+def get_destination():
+    data = sessions.top_destination()
+    return json.dumps(data)
+
+@app.route('/session/destination_bar', methods=['GET','POST'])
+@app.route('/session/destination_bar/<int:limit>', methods=['GET','POST'])
+def get_destination_bar(limit=10):
+    if request.method == 'POST':
+        limit = request.form['num_of_sessions'] 
+    data = sessions.top_destination(limit)
+    return render_template('bar_chart.html', 
+        title = "Top destinations", data=data, labels=[{'x':'count'},{'y':'Destination'}])
+
+@app.route('/session/source')
+def get_source():
+    data = sessions.top_source()
+    return json.dumps(data)
+
+@app.route('/session/source_bar', methods=['GET','POST'])
+@app.route('/session/source_bar/<int:limit>', methods=['GET','POST'])
+def get_source_bar(limit=10):
+    if request.method == 'POST':
+        limit = request.form['num_of_sessions']   
+    data = sessions.top_source(limit)
+    return render_template('bar_chart.html', 
+        title = "Top sources", data=data, labels=[{'x':'count'},{'y':'Source'}])
 
 app.secret_key = "juniper"
 connection_string = "mongodb://localhost"

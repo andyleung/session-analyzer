@@ -20,6 +20,7 @@ __author__ = 'aleung@juniper.net'
 
 import sys
 from cgi import escape
+from bson.son import SON
 
 # The Blog Post Data Access Object handles interactions with the Posts collection
 class SessionsDAO:
@@ -128,5 +129,18 @@ class SessionsDAO:
             print "Unexpected error:", sys.exc_info()[0]
 
         return True
+
+    def top_destination(self,limit=10):
+        ## pipeline = [{"$group":{"_id":"$destination","count":{"$sum":1}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Destination":"$_id","count":1}}]            
+        pipeline = [{"$group":{"_id":"$destination","count":{"$sum":1}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Destination":"$_id","count":1}},{"$limit":int(limit)}]            
+        data = self.sessions.aggregate(pipeline)['result']   
+        return data
+
+    def top_source(self,limit=10):
+        pipeline = [{"$group":{"_id":"$source","count":{"$sum":1}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Source":"$_id","count":1}},{"$limit":int(limit)}]            
+        data = self.sessions.aggregate(pipeline)['result']   
+        return data
+
+
 
     
