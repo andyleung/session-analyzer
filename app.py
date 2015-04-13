@@ -26,15 +26,8 @@ import json
 
 app = Flask(__name__)
 
+# route for handling the SRX login 
 @app.route('/')
-def home():
-	return "Hello, world!!"
-
-@app.route('/welcome')
-def welcome():
-    return render_template('welcome.html')
-
-# route for handling the login page logic
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
@@ -92,7 +85,7 @@ def get_source_bar(limit=10):
 
 @app.route('/session/top_talker', methods=['GET','POST'])
 @app.route('/session/top_talker/<int:limit>', methods=['GET','POST'])
-def get_talker_bar(limit=10):
+def get_talker(limit=10):
     if request.method == 'POST':
         limit = request.form['num_of_sessions'] 
     data = sessions.top_talker(limit)
@@ -101,7 +94,7 @@ def get_talker_bar(limit=10):
 
 @app.route('/session/top_pkt', methods=['GET','POST'])
 @app.route('/session/top_pkt/<int:limit>', methods=['GET','POST'])
-def get_pkt_bar(limit=10):
+def get_pkt(limit=10):
     if request.method == 'POST':
         limit = request.form['num_of_sessions'] 
     data = sessions.top_pkt(limit)
@@ -110,7 +103,7 @@ def get_pkt_bar(limit=10):
 
 @app.route('/session/top_policy', methods=['GET','POST'])
 @app.route('/session/top_policy/<int:limit>', methods=['GET','POST'])
-def get_policy_bar(limit=10):
+def get_policy(limit=10):
     if request.method == 'POST':
         limit = request.form['num_of_sessions'] 
     data = sessions.top_policy(limit)
@@ -119,7 +112,7 @@ def get_policy_bar(limit=10):
 
 @app.route('/session/top_source_port', methods=['GET','POST'])
 @app.route('/session/top_source_port/<int:limit>', methods=['GET','POST'])
-def get_source_port__bar(limit=10):
+def get_source_port(limit=10):
     if request.method == 'POST':
         limit = request.form['num_of_sessions'] 
     data = sessions.top_source_port(limit)
@@ -128,12 +121,27 @@ def get_source_port__bar(limit=10):
 
 @app.route('/session/top_destination_port', methods=['GET','POST'])
 @app.route('/session/top_destination_port/<int:limit>', methods=['GET','POST'])
-def get_destination_port__bar(limit=10):
+def get_destination_port(limit=10):
     if request.method == 'POST':
         limit = request.form['num_of_sessions'] 
     data = sessions.top_destination_port(limit)
     return render_template('bar_chart.html', 
         title = "Top Destination Ports", data=data, labels=[{'x':'count'},{'y':'Destination_Port'}])
+
+@app.route('/session/top_protocol', methods=['GET','POST'])
+@app.route('/session/top_protocol/<int:limit>', methods=['GET','POST'])
+def get_protocol(limit=10):
+    if request.method == 'POST':
+        limit = request.form['num_of_sessions'] 
+    data = sessions.top_protocol(limit)
+    return render_template('bar_chart.html', 
+        title = "Top Protocols", data=data, labels=[{'x':'count'},{'y':'Protocol'}])
+
+@app.route('/device_info')
+def get_device():
+    data = sessions.get_attributes()
+    print data
+    return render_template('device.html', data=data)
 
 app.secret_key = "juniper"
 connection_string = "mongodb://localhost"

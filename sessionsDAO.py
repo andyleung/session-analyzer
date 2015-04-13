@@ -21,6 +21,7 @@ __author__ = 'aleung@juniper.net'
 import sys
 from cgi import escape
 from bson.son import SON
+from datetime import datetime
 
 # The Blog Post Data Access Object handles interactions with the Posts collection
 class SessionsDAO:
@@ -82,7 +83,7 @@ class SessionsDAO:
             # Insert to MongoDB
             try:
                 self.sessions.insert(flow)
-                print "Inserting the session"
+                ##print "Inserting the session"
             except:
                 print "Error inserting post"
                 print "Unexpected error:", sys.exc_info()[0]
@@ -116,7 +117,8 @@ class SessionsDAO:
                 "unicast_sessions": unicast_sessions.replace('\n',''),
                 "multicast_sessions": multicast_sessions.replace('\n',''),
                 "failed_sessions": failed_sessions.replace('\n',''),
-                "max_sessions": max_sessions.replace('\n','')
+                "max_sessions": max_sessions.replace('\n',''),
+                "last_update": str(datetime.now())
                 }
 
         # now insert the post
@@ -164,5 +166,14 @@ class SessionsDAO:
     def top_destination_port(self,limit=10):
         pipeline = [{"$group":{"_id":"$destination_port","count":{"$sum":1}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Destination_Port":"$_id","count":1}},{"$limit":int(limit)}]            
         data = self.sessions.aggregate(pipeline)['result']  
+        return data
+
+    def top_protocol(self,limit=10):
+        pipeline = [{"$group":{"_id":"$protocol","count":{"$sum":1}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Protocol":"$_id","count":1}},{"$limit":int(limit)}]            
+        data = self.sessions.aggregate(pipeline)['result']  
+        return data
+
+    def get_attributes(self):
+        data = self.device.find_one()
         return data
 
