@@ -66,7 +66,7 @@ class SessionsDAO:
             # new session entry
             flow = {"session_id": int(id.text),
                      "policy": policy.replace('\n',''),
-                     "application_name": application_name,
+                     "application_name": application_name.replace('\n',''),
                      "application_value": application_value,                 
                      "pkt_cnt": pkt_cnt,
                      "byte_cnt": byte_cnt,
@@ -141,6 +141,28 @@ class SessionsDAO:
         data = self.sessions.aggregate(pipeline)['result']   
         return data
 
+    def top_talker(self,limit=10):
+        pipeline = [{"$group":{"_id":"$source","count":{"$sum":"$byte_cnt"}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Source":"$_id","count":1}},{"$limit":int(limit)}]            
+        data = self.sessions.aggregate(pipeline)['result']   
+        return data
 
+    def top_policy(self,limit=10):
+        pipeline = [{"$group":{"_id":"$policy","count":{"$sum":1}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Policy":"$_id","count":1}},{"$limit":int(limit)}]            
+        data = self.sessions.aggregate(pipeline)['result']  
+        return data
 
-    
+    def top_pkt(self,limit=10):
+        pipeline = [{"$group":{"_id":"$source","count":{"$sum":"$pkt_cnt"}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Source":"$_id","count":1}},{"$limit":int(limit)}]            
+        data = self.sessions.aggregate(pipeline)['result']  
+        return data
+
+    def top_source_port(self,limit=10):
+        pipeline = [{"$group":{"_id":"$source_port","count":{"$sum":1}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Source_Port":"$_id","count":1}},{"$limit":int(limit)}]            
+        data = self.sessions.aggregate(pipeline)['result']  
+        return data
+
+    def top_destination_port(self,limit=10):
+        pipeline = [{"$group":{"_id":"$destination_port","count":{"$sum":1}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Destination_Port":"$_id","count":1}},{"$limit":int(limit)}]            
+        data = self.sessions.aggregate(pipeline)['result']  
+        return data
+

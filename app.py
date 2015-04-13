@@ -90,6 +90,51 @@ def get_source_bar(limit=10):
     return render_template('bar_chart.html', 
         title = "Top sources", data=data, labels=[{'x':'count'},{'y':'Source'}])
 
+@app.route('/session/top_talker', methods=['GET','POST'])
+@app.route('/session/top_talker/<int:limit>', methods=['GET','POST'])
+def get_talker_bar(limit=10):
+    if request.method == 'POST':
+        limit = request.form['num_of_sessions'] 
+    data = sessions.top_talker(limit)
+    return render_template('bar_chart.html', 
+        title = "Top Talkers (kbyte)", data=data, labels=[{'x':'count'},{'y':'Source'}])
+
+@app.route('/session/top_pkt', methods=['GET','POST'])
+@app.route('/session/top_pkt/<int:limit>', methods=['GET','POST'])
+def get_pkt_bar(limit=10):
+    if request.method == 'POST':
+        limit = request.form['num_of_sessions'] 
+    data = sessions.top_pkt(limit)
+    return render_template('bar_chart.html', 
+        title = "Top Talkers (packets)", data=data, labels=[{'x':'count'},{'y':'Source'}])
+
+@app.route('/session/top_policy', methods=['GET','POST'])
+@app.route('/session/top_policy/<int:limit>', methods=['GET','POST'])
+def get_policy_bar(limit=10):
+    if request.method == 'POST':
+        limit = request.form['num_of_sessions'] 
+    data = sessions.top_policy(limit)
+    return render_template('bar_chart.html', 
+        title = "Top Policies", data=data, labels=[{'x':'count'},{'y':'Policy'}])
+
+@app.route('/session/top_source_port', methods=['GET','POST'])
+@app.route('/session/top_source_port/<int:limit>', methods=['GET','POST'])
+def get_source_port__bar(limit=10):
+    if request.method == 'POST':
+        limit = request.form['num_of_sessions'] 
+    data = sessions.top_source_port(limit)
+    return render_template('bar_chart.html', 
+        title = "Top Source Ports", data=data, labels=[{'x':'count'},{'y':'Source_Port'}])
+
+@app.route('/session/top_destination_port', methods=['GET','POST'])
+@app.route('/session/top_destination_port/<int:limit>', methods=['GET','POST'])
+def get_destination_port__bar(limit=10):
+    if request.method == 'POST':
+        limit = request.form['num_of_sessions'] 
+    data = sessions.top_destination_port(limit)
+    return render_template('bar_chart.html', 
+        title = "Top Destination Ports", data=data, labels=[{'x':'count'},{'y':'Destination_Port'}])
+
 app.secret_key = "juniper"
 connection_string = "mongodb://localhost"
 connection = pymongo.MongoClient(connection_string)
@@ -98,5 +143,7 @@ sessions = sessionsDAO.SessionsDAO(database)
 
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	app.run( host='0.0.0.0', port=5000, debug=True)
+
+
 
