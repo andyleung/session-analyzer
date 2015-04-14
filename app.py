@@ -27,7 +27,7 @@ import json
 app = Flask(__name__)
 
 # route for handling the SRX login 
-@app.route('/')
+@app.route('/', methods=['GET','POST'])
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
@@ -50,7 +50,7 @@ def login():
             print "Device Name: ", device['hostname']
             print device
             dev.close()
-            return redirect(url_for('welcome'))
+            return redirect(url_for('get_device'))
         else:
             error = 'Wrong Credentials. Please try again.'
     return render_template('login.html', error=error)
@@ -90,7 +90,7 @@ def get_talker(limit=10):
         limit = request.form['num_of_sessions'] 
     data = sessions.top_talker(limit)
     return render_template('bar_chart.html', 
-        title = "Top Talkers (kbyte)", data=data, labels=[{'x':'count'},{'y':'Source'}])
+        title = "Top Talkers (bytes)", data=data, labels=[{'x':'count'},{'y':'Source'}])
 
 @app.route('/session/top_pkt', methods=['GET','POST'])
 @app.route('/session/top_pkt/<int:limit>', methods=['GET','POST'])
@@ -100,6 +100,24 @@ def get_pkt(limit=10):
     data = sessions.top_pkt(limit)
     return render_template('bar_chart.html', 
         title = "Top Talkers (packets)", data=data, labels=[{'x':'count'},{'y':'Source'}])
+
+@app.route('/session/top_ingress', methods=['GET','POST'])
+@app.route('/session/top_ingress/<int:limit>', methods=['GET','POST'])
+def get_ingress(limit=10):
+    if request.method == 'POST':
+        limit = request.form['num_of_sessions'] 
+    data = sessions.top_ingress(limit)
+    return render_template('bar_chart.html', 
+        title = "Top Ingress Ports (bytes)", data=data, labels=[{'x':'count'},{'y':'Ingress'}])
+
+@app.route('/session/top_egress', methods=['GET','POST'])
+@app.route('/session/top_egress/<int:limit>', methods=['GET','POST'])
+def get_egress(limit=10):
+    if request.method == 'POST':
+        limit = request.form['num_of_sessions'] 
+    data = sessions.top_egress(limit)
+    return render_template('bar_chart.html', 
+        title = "Top Egress Ports (bytes)", data=data, labels=[{'x':'count'},{'y':'Egress'}])
 
 @app.route('/session/top_policy', methods=['GET','POST'])
 @app.route('/session/top_policy/<int:limit>', methods=['GET','POST'])
@@ -140,7 +158,7 @@ def get_protocol(limit=10):
 @app.route('/device_info')
 def get_device():
     data = sessions.get_attributes()
-    print data
+    ##print data
     return render_template('device.html', data=data)
 
 app.secret_key = "juniper"

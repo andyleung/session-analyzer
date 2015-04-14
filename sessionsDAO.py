@@ -158,6 +158,16 @@ class SessionsDAO:
         data = self.sessions.aggregate(pipeline)['result']  
         return data
 
+    def top_ingress(self,limit=10):
+        pipeline = [{"$group":{"_id":"$ingress","count":{"$sum":"$byte_cnt"}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Ingress":"$_id","count":1}},{"$limit":int(limit)}]            
+        data = self.sessions.aggregate(pipeline)['result']   
+        return data
+
+    def top_egress(self,limit=10):
+        pipeline = [{"$group":{"_id":"$egress","count":{"$sum":"$byte_cnt"}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Egress":"$_id","count":1}},{"$limit":int(limit)}]            
+        data = self.sessions.aggregate(pipeline)['result']   
+        return data
+
     def top_source_port(self,limit=10):
         pipeline = [{"$group":{"_id":"$source_port","count":{"$sum":1}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Source_Port":"$_id","count":1}},{"$limit":int(limit)}]            
         data = self.sessions.aggregate(pipeline)['result']  
