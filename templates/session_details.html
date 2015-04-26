@@ -1,0 +1,28 @@
+{% extends "navbar.html" %}
+{% block content %}
+
+<head>
+    <title>Top Sessions Statistics</title>
+</head>
+
+<div class="container body-content">
+<h1> {{ title }} {{ ip }}</h1>
+<body>
+
+<form>
+<table style="width: auto;" class="table table-bordered table-condensed table-hover table-striped">
+  <tr>
+    <th>Destination Addresses</th><th>Bytes</th><th># of sessions</th>
+  </tr>
+{% for row in data %}
+  <tr>
+<!--   %for col in row: -->
+    <th>{{row['Destination']}}</th><td>{{row['byte_count']}}</td><td>{{row['session_count']}}</td>
+{% endfor %}
+  </tr>
+</table
+</form>
+</body>
+</div>
+
+{% endblock %}

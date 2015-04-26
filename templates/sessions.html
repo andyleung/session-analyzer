@@ -1,0 +1,29 @@
+{% extends "navbar.html" %}
+{% block content %}
+
+<head>
+    <title>Top Sessions Statistics</title>
+</head>
+
+<div class="container body-content">
+<h1> {{ title }} </h1>
+<body>
+
+<form method="post">
+<table style="width: auto;" class="table table-bordered table-condensed table-hover table-striped">
+  <tr>
+    <th>IP Addresses</th><th>Bytes</th>
+  </tr>
+{% for row in data %}
+  <tr>
+<!--   %for col in row: -->
+    <th><input type="radio" name="ip_address" value={{ row['Source'] }} style="margin-right: 10px">{{row['Source']}}</th><td>{{row['count']}}</td>
+{% endfor %}
+  </tr>
+</table>
+  <input value="Details" type="submit" />
+</form>
+</body>
+</div>
+
+{% endblock %}

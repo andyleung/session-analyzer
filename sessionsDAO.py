@@ -169,6 +169,11 @@ class SessionsDAO:
         data = self.sessions.aggregate(pipeline)['result']   
         return data
 
+    def top_talker_all(self):
+        pipeline = [{"$group":{"_id":"$source","count":{"$sum":"$byte_cnt"}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Source":"$_id","count":1}}]            
+        data = self.sessions.aggregate(pipeline)['result']   
+        return data
+
     def top_policy(self,limit=10):
         pipeline = [{"$group":{"_id":"$policy","count":{"$sum":1}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Policy":"$_id","count":1}},{"$limit":int(limit)}]            
         data = self.sessions.aggregate(pipeline)['result']  
@@ -212,6 +217,16 @@ class SessionsDAO:
     def top_city(self, limit=10):
         pipeline = [{"$group":{"_id":"$city","count":{"$sum":1}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"City":"$_id","count":1}},{"$limit":int(limit)}]            
         data = self.sessions.aggregate(pipeline)['result']  
+        return data
+
+    def detail_ip_byte(self,ip):
+        pipeline = [{"$match":{"source":ip}},{"$group":{"_id":"$destination","byte_count":{"$sum":"$byte_cnt"}}},{"$sort":SON([("byte_count",-1)])},{"$project":{"_id":0,"Destination":"$_id","byte_count":1}}]            
+        data = self.sessions.aggregate(pipeline)['result']   
+        return data
+
+    def detail_ip_session(self,ip):
+        pipeline = [{"$match":{"source":ip}},{"$group":{"_id":"$destination","session_count":{"$sum":1}}},{"$sort":SON([("session_count",-1)])},{"$project":{"_id":0,"Destination":"$_id","session_count":1}}]            
+        data = self.sessions.aggregate(pipeline)['result']   
         return data
 
     def get_attributes(self):

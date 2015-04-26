@@ -179,6 +179,26 @@ def draw_map():
               list_of_countries.append(i)
     return render_template('map.html', info=list_of_countries, max=scale)  # render a template
 
+@app.route('/table/top_talker', methods=['GET','POST'])
+def get_talker_all():
+    if request.method == 'POST':
+        ip = request.form['ip_address']
+        byte_table = sessions.detail_ip_byte(ip)
+        session_table = sessions.detail_ip_session(ip)
+        print "Volume Details: ", byte_table
+        print "Session Details: ", session_table
+        data = []
+        for x,y in zip(byte_table, session_table):
+            z = x.copy()
+            z.update(y)
+            data.append(z)
+        return render_template('session_details.html',title = "Top Talker Details: ",ip=ip, data=data)
+    data = sessions.top_talker_all()
+    print "Top Talkers: ", data
+    return render_template('sessions.html', 
+        title = "Top Talkers (bytes)", data=data)
+
+
 @app.route('/device_info')
 def get_device():
     data = sessions.get_attributes()
