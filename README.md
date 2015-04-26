@@ -14,6 +14,14 @@
 	$ python app.py
 ```
 
+## Geo Data Download:
+-----------------
+There is a file 'GeoLiteCity.dat' you need to download and place under the "static" directory for displaying Geo data.
+1. Download GeoLiteCity.dat 
+2. http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
+3. gunzip GeoLiteCity.dat.gz
+
+
 ## Installation with Vagrant and VirtualBox
 -----------------
 1. Install vagrant

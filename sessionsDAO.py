@@ -19,6 +19,7 @@ __author__ = 'aleung@juniper.net'
 #
 
 import sys
+import pygeoip
 from cgi import escape
 from bson.son import SON
 from datetime import datetime
@@ -36,6 +37,7 @@ class SessionsDAO:
     def insert_entry(self, session_table):
         print "inserting session table ..."
         self.sessions.drop()
+        geodata = pygeoip.GeoIP('static/GeoLiteCity.dat')
 
         for session in session_table.findall('.//flow-session'):
             id = session.find('session-identifier')
@@ -64,6 +66,21 @@ class SessionsDAO:
             ingress = interfaces[0].text
             egress = interfaces[1].text
 
+            # Get Geo info from IP address
+            data = geodata.record_by_name(destination.replace('\n',''))
+            # debug:
+            if data:
+                print "Data is: ", data
+                country = data['country_name']
+                city = data['city']
+                longitude = data['longitude']
+                latitude = data['latitude']
+            else: 
+                country = ""
+                city = ""
+                longitude = ""
+                latitude = ""
+
             # new session entry
             flow = {"session_id": int(id.text),
                      "policy": policy.replace('\n',''),
@@ -77,7 +94,11 @@ class SessionsDAO:
                      "destination_port": destination_port.replace('\n',''),
                      "protocol": protocol.replace('\n',''),
                      "ingress": ingress.replace('\n',''),
-                     "egress": egress.replace('\n','')
+                     "egress": egress.replace('\n',''),
+                     "city": city,
+                     "country": country,
+                     "longitude": longitude,
+                     "latitude": latitude
                      }
 
             # Insert to MongoDB
@@ -180,6 +201,16 @@ class SessionsDAO:
 
     def top_protocol(self,limit=10):
         pipeline = [{"$group":{"_id":"$protocol","count":{"$sum":1}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Protocol":"$_id","count":1}},{"$limit":int(limit)}]            
+        data = self.sessions.aggregate(pipeline)['result']  
+        return data
+
+    def top_country(self, limit=10):
+        pipeline = [{"$group":{"_id":{"country":"$country","latitude":"$latitude","longitude":"$longitude"},"count":{"$sum":1}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"Country":"$_id.country","count":1,"latitude":"$_id.latitude","longitude":"$_id.longitude"}},{"$limit":int(limit)}]            
+        data = self.sessions.aggregate(pipeline)['result']  
+        return data
+
+    def top_city(self, limit=10):
+        pipeline = [{"$group":{"_id":"$city","count":{"$sum":1}}},{"$sort":SON([("count",-1)])},{"$project":{"_id":0,"City":"$_id","count":1}},{"$limit":int(limit)}]            
         data = self.sessions.aggregate(pipeline)['result']  
         return data
 

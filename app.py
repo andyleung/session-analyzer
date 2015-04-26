@@ -40,7 +40,7 @@ def login():
         #
         dev = Device(hostname,user=username,password=password)
         if dev.open():
-            print "Login confirm"
+            print "Login success"
             session_table = dev.rpc.get_flow_session_information()
             status = dev.rpc.get_flow_session_information(summary=True)
             sessions.insert_entry(session_table)
@@ -137,15 +137,6 @@ def get_source_port(limit=10):
     return render_template('bar_chart.html', 
         title = "Top Source Ports", data=data, labels=[{'x':'count'},{'y':'Source_Port'}])
 
-@app.route('/session/top_destination_port', methods=['GET','POST'])
-@app.route('/session/top_destination_port/<int:limit>', methods=['GET','POST'])
-def get_destination_port(limit=10):
-    if request.method == 'POST':
-        limit = request.form['num_of_sessions'] 
-    data = sessions.top_destination_port(limit)
-    return render_template('bar_chart.html', 
-        title = "Top Destination Ports", data=data, labels=[{'x':'count'},{'y':'Destination_Port'}])
-
 @app.route('/session/top_protocol', methods=['GET','POST'])
 @app.route('/session/top_protocol/<int:limit>', methods=['GET','POST'])
 def get_protocol(limit=10):
@@ -155,10 +146,42 @@ def get_protocol(limit=10):
     return render_template('bar_chart.html', 
         title = "Top Protocols", data=data, labels=[{'x':'count'},{'y':'Protocol'}])
 
+@app.route('/session/top_country', methods=['GET','POST'])
+@app.route('/session/top_country/<int:limit>', methods=['GET','POST'])
+def get_country(limit=10):
+    if request.method == 'POST':
+        limit = request.form['num_of_sessions'] 
+    data = sessions.top_country(limit)
+    ## print "Country data: ", data
+    return render_template('bar_chart.html', 
+        title = "Top Countries", data=data, labels=[{'x':'count'},{'y':'Country'}])
+
+@app.route('/session/top_city', methods=['GET','POST'])
+@app.route('/session/top_city/<int:limit>', methods=['GET','POST'])
+def get_city(limit=10):
+    if request.method == 'POST':
+        limit = request.form['num_of_sessions'] 
+    data = sessions.top_city(limit)
+    return render_template('bar_chart.html', 
+        title = "Top Cities", data=data, labels=[{'x':'count'},{'y':'City'}])
+
+@app.route('/map')
+def draw_map():
+    scale = 100
+    limit = 100
+    # Sample ip_info = [{'count':100, 'latitude': 37.385999999999996, 'ip': '8.8.8.8', 'longitude': -122.0838}, 
+    ip_info = sessions.top_country(limit)
+    # print "IP info: ", ip_info
+    list_of_countries = []
+    for i in ip_info:
+         if i['Country']:
+              #print "country: ", i['Country']
+              list_of_countries.append(i)
+    return render_template('map.html', info=list_of_countries, max=scale)  # render a template
+
 @app.route('/device_info')
 def get_device():
     data = sessions.get_attributes()
-    ##print data
     return render_template('device.html', data=data)
 
 app.secret_key = "juniper"

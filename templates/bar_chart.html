@@ -5,9 +5,9 @@
   <script src="http://dimplejs.org/dist/dimple.v2.1.2.min.js"></script>
   <script type="text/javascript">
     function draw(data, xlabel, ylabel){
-      var svg = dimple.newSvg("body",800,400);
+      var svg = dimple.newSvg("body",800,500);
       var chart = new dimple.chart(svg, data);
-      chart.setBounds(200,25,"75%","75%")
+      chart.setBounds("200px","100px","50%","50%")
       chart.ease = "elastic";
       var myAxis = chart.addCategoryAxis("y", ylabel);
       myAxis.fontSize = "15px"
