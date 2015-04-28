@@ -137,6 +137,15 @@ def get_source_port(limit=10):
     return render_template('bar_chart.html', 
         title = "Top Source Ports", data=data, labels=[{'x':'count'},{'y':'Source_Port'}])
 
+@app.route('/session/top_destination_port', methods=['GET','POST'])
+@app.route('/session/top_destination_port/<int:limit>', methods=['GET','POST'])
+def get_destination_port(limit=10):
+    if request.method == 'POST':
+        limit = request.form['num_of_sessions'] 
+    data = sessions.top_destination_port(limit)
+    return render_template('bar_chart.html', 
+        title = "Top Destination Ports", data=data, labels=[{'x':'count'},{'y':'Destination_Port'}])
+
 @app.route('/session/top_protocol', methods=['GET','POST'])
 @app.route('/session/top_protocol/<int:limit>', methods=['GET','POST'])
 def get_protocol(limit=10):
@@ -151,8 +160,12 @@ def get_protocol(limit=10):
 def get_country(limit=10):
     if request.method == 'POST':
         limit = request.form['num_of_sessions'] 
-    data = sessions.top_country(limit)
+    result = sessions.top_country(limit)
     ## print "Country data: ", data
+    data = []
+    for i in result:
+        if i['Country']:
+            data.append(i)
     return render_template('bar_chart.html', 
         title = "Top Countries", data=data, labels=[{'x':'count'},{'y':'Country'}])
 
@@ -161,7 +174,11 @@ def get_country(limit=10):
 def get_city(limit=10):
     if request.method == 'POST':
         limit = request.form['num_of_sessions'] 
-    data = sessions.top_city(limit)
+    result = sessions.top_city(limit)
+    data = []
+    for i in result:
+        if i['City']:
+            data.append(i)
     return render_template('bar_chart.html', 
         title = "Top Cities", data=data, labels=[{'x':'count'},{'y':'City'}])
 
@@ -178,6 +195,22 @@ def draw_map():
               #print "country: ", i['Country']
               list_of_countries.append(i)
     return render_template('map.html', info=list_of_countries, max=scale)  # render a template
+
+@app.route('/map3')
+def draw_map3():
+    limit = 100
+    # Sample ip_info = [{'count':100, 'latitude': 37.385999999999996, 'ip': '8.8.8.8', 'longitude': -122.0838}, 
+    ip_info = sessions.top_country(limit)
+    # print "IP info: ", ip_info
+    data = []
+    for i in ip_info:
+         if i['Country']:
+              #print "country: ", i['Country']
+              i['radius'] = 12
+              i['fillKey'] ='bubbleEX'
+              data.append(i)
+    return render_template('map3.html', data=data)  # render a template
+
 
 @app.route('/table/top_talker', methods=['GET','POST'])
 def get_talker_all():
