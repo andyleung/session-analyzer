@@ -39,7 +39,7 @@ class SessionsDAO:
         self.sessions.drop()
         geodata = pygeoip.GeoIP('static/GeoLiteCity.dat')
 
-        for session in session_table.findall('.//flow-session'):
+        for session in session_table.xpath("//*[local-name()='flow-session']"):
             id = session.find('session-identifier')
             policy = session.findtext('policy')
             app_name = session.find('application-name')

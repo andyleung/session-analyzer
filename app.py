@@ -20,6 +20,7 @@ __author__ = 'aleung@juniper.net'
 
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from jnpr.junos import Device
+from lxml import etree
 import sessionsDAO
 import pymongo
 import json
@@ -236,6 +237,22 @@ def get_talker_all():
 def get_device():
     data = sessions.get_attributes()
     return render_template('device.html', data=data)
+
+@app.route('/upload', methods=['GET','POST'])
+def upload():
+    if request.method == 'GET':
+        return render_template('upload.html')
+    elif request.method == 'POST':
+        # Get the name of the uploaded file
+        file = request.files['file']
+        # Check if the file is one of the allowed types/extensions
+        if file: 
+            tree = etree.parse(file)
+            root = tree.getroot()
+            sessions.insert_entry(root)
+    ## return render_template('upload.html')
+    return redirect(url_for('draw_map3'))
+
 
 app.secret_key = "juniper"
 connection_string = "mongodb://localhost"
